@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <style>
+        /* Dropdown Button */
+        .dropbtn {
+            background-color: #3498DB;
+            color: white;
+            padding: 16px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Dropdown button on hover & focus */
+        .dropbtn:hover,
+        .dropbtn:focus {
+            background-color: #2980B9;
+        }
+
+        /* The container <div> - needed to position the dropdown content */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Dropdown Content (Hidden by Default) */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f1f1f1;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        /* Change color of dropdown links on hover */
+        .dropdown-content a:hover {
+            background-color: #ddd
+        }
+
+        /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+        .show {
+            display: block;
+        }
+
+        body {
+            font-family: sans-serif;
+            background: #111;
+            color: #eee;
+            font-size: 0.8rem;
+            padding: 0;
+            margin: 0;
+        }
+
+        table {
+            table-layout: fixed;
+        }
+
+        th {
+            font-weight: bold;
+        }
+
+        th,
+        td {
+            text-align: right;
+        }
+
+        article {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .divider {
+            background: #222;
+        }
+
+        .orderbook-header {
+            background: #222;
+        }
+
+        .current-price {
+            font-weight: bold;
+            font-size: 1.25rem;
+            padding: 0.25rem 1rem;
+        }
+
+        /* .side {
+            height: 50%;
+            overflow-y: scroll;
+        } */
+
+        .price.sell {
+            color: #c00;
+        }
+
+        .price.buy {
+            color: #0c0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dropdown" style="margin-left: 40%; margin-top: 5%; margin-bottom: 5%;">
+        <button onclick="myFunction()" class="dropbtn">Dropdown</button>
+        <div id="myDropdown" class="dropdown-content">
+            <a href="/ETHUSD">ETH/USD</a>
+            <a href="/ETHEUR">ETH/EUR</a>
+            <a href="/BTCUSD">BTC/USD</a>
+        </div>
+    </div>
+
+
+    <article style="width: 50%; margin-left: 25%; margin-right: 25%; height: 80%;">
+        <section class="orderbook-header">
+            <table width="100%">
+                <tr>
+                    <th class="price" width="25%">AMOUNT</th>
+                    <th width="25%">VOLUME</th>
+                    <th width="25%">Exchange</th>
+                </tr>
+            </table>
+        </section>
+        <section class="side" id="asks">
+            <table width="100%" id="ask">
+                <tr>
+                    <td width="25%" class="price sell priceclick">1000000.00000</td>
+                    <td width="25%">0.00000100</td>
+                    <td width="25%">10000.00000</td>
+                </tr>
+            </table>
+        </section>
+        <!-- <section class="divider">
+            <div class="current-price">715.00000</div>
+        </section> -->
+        <section class="side bids">
+            <table width="100%" id="bid">
+                <tr>
+                    <td width="25%" class="price buy priceclick">710.00000</td>
+                    <td width="25%">0.00140845</td>
+                    <td width="25%">19.94390</td>
+                    <td width="25%">0.02809</td>
+                </tr>
+
+            </table>
+        </section>
+    </article>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        console.log("INNNNNNNNNNNN");
+        const socket = io();
+        let orderbook;
+        socket.on('updateBid', function (data) {
+            console.log('updating...');
+            
+            orderbook = JSON.parse(data);
+            //console.log(orderbook['XBT/USDC']);
+            let table = document.getElementById('bid');
+            table.innerHTML = '';
+            if (orderbook['ETH/EUR']) {
+                orderbook['ETH/EUR'] = orderbook['ETH/EUR'].reverse();
+                for (let item of orderbook['ETH/EUR']) {
+                    let tr = table.insertRow();
+                    let td1 = tr.insertCell();
+                    td1.classList = 'price buy priceclick';
+                    td1.innerHTML = item[0];
+                    let td2 = tr.insertCell();
+                    td2.innerHTML = item[1];
+                    let td3 = tr.insertCell();
+                    td3.innerHTML = item[2];
+                }
+                console.log(orderbook['ETH/EUR'].length);
+            }
+        });
+
+        socket.on('updateAsk', function (data) {
+                console.log('Updating...');
+
+                orderbook = JSON.parse(data);
+                //console.log(orderbook['XBT/USDC']);
+                let table = document.getElementById('ask');
+                table.innerHTML = '';
+                if (orderbook['ETH/EUR']) {
+                    orderbook['ETH/EUR'] = orderbook['ETH/EUR'].reverse();
+                    for (let item of orderbook['ETH/EUR']) {
+                        let tr = table.insertRow();
+                        let td1 = tr.insertCell();
+                        td1.classList = 'price sell priceclick';
+                        td1.innerHTML = item[0];
+                        let td2 = tr.insertCell();
+                        td2.innerHTML = item[1];
+                        let td3 = tr.insertCell();
+                        td3.innerHTML = item[2];
+                    }
+                    console.log(orderbook['ETH/EUR'].length);
+                }
+            });
+
+        function myFunction() {
+            document.getElementById("myDropdown").classList.toggle("show");
+        }
+
+        function getOrderBook(pair) {
+            //alert("IN");
+            //socket.emit('hi', 'hi');
+            let ul = document.getElementById('order-book');
+            console.log(orderbook);
+            for (let item of orderbook[pair].get_inorder_array) {
+                let listItem = document.createElement('li');
+                listItem.innerHTML = item;
+                ul.appendChild(listItem);
+            }
+        }
+
+        window.onclick = function (event) {
+            if (!event.target.matches('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                var i;
+                for (i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
